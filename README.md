@@ -421,6 +421,8 @@
 
 #### 数据库的增删改查操作
 
+##### 基本的一些数据库操作
+
 > * 注意我们的对数据库的操作的话，如果进行的**增加、删除、修改**的操作，我们是需要进行**提交事务的 `commit`**
 > * **插入数据**
 >   * **`insert into 表名 [(字段名)] values (数据);`**
@@ -469,3 +471,183 @@
 >     * **`select * from 表名 limit 0, 5`**
 >       * 这个语句就是表示的是获取前五个查询到的数据，**第一个数字是起始下标，第二个数字是查询的步长**
 >       * 这个就是使用的是 **`limit` 关键字**
+>   * **去重查询**
+>     * **`select distinct 字段名 from 表名;`**
+>       * 实现我们的去重查询的话，我们是可以直接使用 `distinct` 关键字实现的
+>       * 通过这个关键字，我们就可以实现简单的去重操作了
+>   * **排序查询**
+>     * **`select * from 表名 order by 表中具备的字段名 asc|desc`**
+>       * `asc` 或者 `desc` 前者是默认的从低到高排序，后者是从高到低排序
+
+##### 数据库的进阶操作
+
+> * **聚合函数查询**
+>   * **`select 聚合函数名(字段名) from 表名;`**
+>     * **count** 实现的是返回结果集中所有值的数目
+>     * **sum** 返回查询结果集中所有值的总和
+>     * **avg** 返回结果集中所有值的平均值
+>     * **max** 实现的返回结果集中所有值的最大值
+>     * **min** 实现的是返回结果集中所有值的最小值
+> * **分组查询**
+>   * **`select 字段名 from 表名 group by 指定根据什么字段名分组`**
+>     * 实现我们的分组查询就是使用的是 `group by` 来实现指定我们根据什么来实现分组查询
+>     * 使用分组查询的时候，除了分组查询字段和聚合函数外，其他的字段查询尽量不要混入查询，否则报错
+
+
+
+
+
+```sql
+create database if not exists library;  -- 创建数据库
+use library;  -- 使用数据库
+
+create table if not exists bookType(  -- 创建表
+	typeid int primary key,
+	typeName varchar(20)
+);
+
+
+create table if not exists readerType(  -- 创建第二张表
+	retypeId int unique not null ,
+	readerName varchar(20) not null,
+	borrowquantity int not null,
+	borrowday int
+);
+
+
+create table if not exists book(  -- 建立第三张表
+	bookId char(10) primary key,
+	bookName varchar(20) not	null,
+	typeid int,
+	bookauthor varchar(20),
+	bookPublihser	varchar(20),
+	bookPrice double,
+	borrowsum int,
+	foreign key (typeid) REFERENCES booktype(typeId)
+);
+
+create table if not exists bookStorage(  -- 创建第三张表
+	bookbarcode char(20) primary key,
+	bookId char(10) not null,
+	bookInTime dateTime,
+	bookStatus varchar(4),
+	FOREIGN key (bookId) REFERENCES book(bookid)
+);
+
+create table if not exists reader(  -- 创建第四章表
+	readerid char(10) PRIMARY key,
+	readername char(20) not null,
+	readerpass varchar(20) not null,
+	retypeid int ,
+	readerdate datetime,
+	readerstatus varchar(4),
+	FOREIGN key (reTypeId) REFERENCES readerType(retypeId)
+);
+
+
+create table if not exists bookborrow(  -- 创建第五张表
+	borrowid char(10) primary key,
+	bookbarcode char(20) not null,
+	readerid char(10) not null,
+	borrowtime datetime,
+	returntime datetime,
+	borrowstatus varchar(4),
+	FOREIGN key (bookBarCode) REFERENCES bookStorage(bookBarCode), 
+	FOREIGN key (readerId) REFERENCES reader(readerId)
+);
+
+-- 开始实现添加数据
+insert into booktype VALUES
+(1, "自然科学"),
+(2, "数学"),
+(3, "计算机"),
+(4, "建筑水利"),
+(5, "旅游地理"),
+(6, "励志/自我实现"),
+(7, "工业技术"),
+(8, "基础医学"),
+(9, "室内设计"),
+(10, "人文景观");
+
+insert into book values
+('TP39/1712','Java程序设计',3,'陈永红','机械工业出版社',35.5,30),
+('013452','离散数学',2,'张小新','机械工业出版社',45.5,10),
+('TP/3452','JSP程序设计案例',3,'刘城清','电子工业出版社',42.8,8),
+('TH/2345','机械设计手册',7,'黄明凡','人民邮电出版社',40,10),
+('R/345677','中医的故事',8,'李奇德','国防工业出版社',20.0,5);
+
+
+insert into bookstorage values
+('132782','TP39/1712','2009-08-10 00:00:00','在馆'),
+('132789','TP39/1712','2009-08-10 00:00:00','借出'),
+('145234','013452','2008-12-06 00:00:00','借出'),
+('145321','TP/3452','2007-11-04 00:00:00','借出'),
+('156833','TH/2345','2009-12-04 00:00:00','借出'),
+('345214','R/345677','2008-11-03 00:00:00','在馆');
+
+
+insert into readertype values
+(1,'学生',10,30),
+(2,'教师',20,60),
+(3,'管理员',15,30),
+(4,'职工',15,20);
+
+insert into reader values
+('0016','苏小东',123456,1,'1999-09-09 00:00:00','有效'),
+('0017','张明',123456,1,'2010-09-10 00:00:00','有效'),
+('0018','梁君红',123456,1,'2010-09-10 00:00:00','有效'),
+('0021','赵清远',123456,2,'2010-07-01 00:00:00','有效'),
+('0034','李瑞清',123456,3,'2009-08-03 00:00:00','有效'),
+('0042','张明月',123456,4,'1997-04-23 00:00:00','有效');
+
+insert into bookborrow values
+('001328','132789','0017','2011-01-24 00:00:00','2011-02-28 00:00:00','已还'),
+('001356','145234','0018','2011-02-12 00:00:00','2011-02-27 00:00:00','已还'),
+('001432','132782','0016','2011-03-04 00:00:00','2011-04-05 00:00:00','已还'),
+('001435','145321','0021','2011-08-09 00:00:00','2011-09-02 00:00:00','已还'),
+('001578','156833','0034','2011-10-01 00:00:00','2011-11-01 00:00:00','未还'),
+('001679','345214','0042','2011-02-21 00:00:00','2011-03-05 00:00:00','未还');
+
+-- 开始实现查询
+select bookid, bookName,borrowsum from book;
+
+select bookid as "书号",bookName as 书名, borrowsum as 接触数量 from book;
+
+select * from reader where retypeid = (select retypeid from readertype where readerName = "学生");
+
+select bookBarcode from bookBorrow where borrowtime
+>= "2011-03-01" and returnTime <= "2011-10-1";
+
+select * from reader where
+retypeid in ((select retypeid from readerType where readerName = "学生"),
+(select retypeid from readerType where readerName = "教师"));
+
+select * from book where bookName like "%程序%";
+
+select * from book order by borrowSum desc limit 3;
+
+select * from book order by borrowSum desc, bookprice desc;
+
+select bookName, bookPrice from book limit 1,5;
+
+select * from bookborrow as a1 LEFT JOIN reader as a2 on a1.readerId = a2.readerid;
+
+select count(bookBarcode) as
+sumBook from bookborrow as a1 LEFT JOIN reader as a2 on a1.readerId = a2.readerid GROUP BY retypeid;
+
+
+select avg(bookprice) as 平均价格 from book group by bookpublihser;
+
+select readerName, bookid, borrowTime, returnTime from bookborrow as b1
+left join reader as b2 on b1.readerid = b2.readerid left join bookstorage as b3
+on b1.bookbarcode = b3.bookbarcode where b1.readerid = "0021" ;
+
+select readerName, bookName, borrowTime returnTime from bookborrow as b1
+left join bookstorage as b2 on b1.bookbarcode = b2.bookbarcode
+left join reader as b3 on b1.readerid = b3.readerid left join book as b4 on b2.bookid = b4.bookid;
+
+select * from bookstorage as a1
+left JOIN bookborrow as a2 on a1.bookbarcode = a2.bookbarcode
+left join reader as a3 on a2.readerid = a3.readerid where bookstatus = '借出';
+```
+
