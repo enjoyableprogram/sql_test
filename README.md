@@ -39,6 +39,10 @@
 >   * 接收/发送数据 `recv/send`
 >   * 关闭连接 `close`
 
+---
+
+---
+
 
 
 ### Python threading 线程的使用
@@ -55,11 +59,15 @@
 >
 > 在我们的实现爬虫的时候，我们为了可以识别我们的服务器给我们响应的数据类型，这个时候，就需要观测 `content-type` 的字段即可
 
+---
 
+---
 
 
 
 ### 数据库的使用（以关系型数据库 Mysql 为例子）
+
+
 
 #### 数据库基础
 
@@ -80,6 +88,8 @@
 >   * 第三代数据库
 >     * 关系-对象型的数据库
 > * 所有的数据库都是含有一个十分相同的一个点： 就是我们的 **sql** 语句 
+
+
 
 #### 应用数据库操作
 
@@ -138,7 +148,7 @@
 >
 >     * `show tables;`  实现的是我们的显示当前所在数据库中存在的表有那些
 >
->   * 创建表的操作
+>   * ###### 创建表的操作
 >
 >     * `create table table_name (字段名 字段类型);`
 >
@@ -167,7 +177,7 @@
 >       */
 >       ```
 >
->   * 删除表的操作
+>   * ###### 删除表的操作
 >
 >     * `drop table if exists table_name;`
 >
@@ -200,15 +210,262 @@
 >       show tables;
 >       ```
 >
->   * ##### 数据库中的数据类型
+>   * ###### 数据库表中的数据类型
 >
->     * 整型 `int`
+>     * 我们的关系型数据库的话，如果需要定义一个字段的话，这个时候就需要实现的是`字段名 数据类型`
+>     * 整型 `int | bigint`
 >     * 浮点型: `float | double`
->     * 自定义数据类型: `decimal(m,d)`
+>     * 自定义数据类型: `decimal(m,d)` m 表示的总的位数，d表示的是小数位数
+>     * 字符串的数据类型: `char(n) | varchar(n)`
+>       * 字符串的话必须记录我们的字符串的 **length**
+>       * **text** 就是表示的是文本的数据类型
+>     * 二进制数据类型
+>     * 日期的数据类型
+>       * **year** 年的数据类型
+>       * **date** 日期的数据类型
+>       * **month** 月的数据类型
+>       * **time** 时间的数据类型
+>       * **datetime** 时间的数据类型
+>     
+>   * 显示表的创建源码 
+>   
+>     * `show create table table_name;` 显示表的定义
+>     * 数据库的引擎就是我们的 **innodb**
+>   
+>   * ```sql
+>     create database if not exists demo;  -- 创建数据库当数据库不存在的时候
+>     use demo;  -- 实现指定我们使用的数据库 demo
+>     
+>     create table if not exists demo_02 ( -- 创建表的操作
+>     	age int,
+>     	name varchar(20),
+>     	id int,
+>     	birthday datetime
+>     );
+>     
+>     show tables;
+>     
+>     insert into demo_02 VALUES(11, "cdsdsc", 2, "1001-12-11 11-11-11");
+>     ```
+
+
 
 #### 数据库约束
 
-#### 数据库设计
+> * 通过数据库的约束来实现保证我们的数据库中的数据插入的正确性，这样就可以实现简介性的保证数据的正确性或者唯一性
+>
+> * 数据的完整性或者说数据的正确性的含有下面的几个概念
+>
+>   * **域完整性** 
+>   * **实体完整性**  
+>   * **自定义完整性**
+>   * **参照完整性**
+>
+> * 我们的数据的含有的约束含有:
+>
+>   * **唯一约束**
+>
+>     * **`unique`**
+>
+>   * **检查约束**
+>
+>     * **`set("男", "女")`**
+>     * **`enum("值一", "值二"...)`** 枚举类型
+>
+>   * **自增约束**
+>
+>     * **`auto_increment`**
+>
+>   * **非空约束**
+>
+>     * **`not null`**
+>
+>   * **默认值约束**
+>
+>     * **`default 默认值`**
+>
+>   * **主键约束**
+>
+>     * 主键的话原本就是具备了两个特征的，一个就是**唯一性以及非空性 `unique not null`**
+>     * 用于实现的是区分我们的每个记录之间的不同
+>     * 就是一种编号，实现的就是我们的一种区分吧
+>     * **`primary key`**
+>
+>   * **外键约束**
+>
+>     * 外键约束就是实现的是我们的添加一些外键字段实现我们的一些内在联系
+>     * `foreign key`
+>
+>   * ```sql
+>     -- 首先创建两个表，其中表A包含主键，表B包含外键
+>     CREATE TABLE table_A (
+>         id INT PRIMARY KEY,
+>         name VARCHAR(50)
+>     );
+>     
+>     CREATE TABLE table_B (
+>         id INT,
+>         a_id INT,
+>         FOREIGN KEY (a_id) REFERENCES table_A(id)
+>     );
+>     
+>     -- 使用ALTER TABLE语句为表B添加外键约束
+>     ALTER TABLE table_B ADD CONSTRAINT fk_a_id FOREIGN KEY (a_id) REFERENCES table_A(id);
+>     
+>     -- alert table 子表名 add constraint 约束名 foreign key(子表中被约束的字段) references 父表(父表字段)
+>     ```
+>
+>   * ```sql
+>     CREATE TABLE table_A (
+>         id INT PRIMARY KEY,
+>         name VARCHAR(50)
+>     );
+>     
+>     CREATE TABLE table_B (
+>         id INT,
+>         a_id INT,
+>         FOREIGN KEY (a_id) REFERENCES table_A(id) ON DELETE CASCADE  -- 就是级联的意思
+>     );
+>     ```
+>
+>   * ```sql
+>     CREATE TRIGGER check_fk BEFORE INSERT ON table_B
+>     FOR EACH ROW
+>     BEGIN
+>         IF NOT EXISTS (SELECT 1 FROM table_A WHERE id = NEW.a_id) THEN
+>             SIGNAL SQLSTATE '45000'
+>             SET MESSAGE_TEXT = 'Invalid foreign key value';
+>         END IF;
+>     END;
+>     ```
+>
+>   * [观看资料](https://www.php.cn/faq/710318.html)
+>
+>   * **`alert table 子表名 add constraint 约束名 foreign key(子表中被约束的字段) references 父表(父表字段)`**
+
+
+
+#### 数据库设计规范
+
+> * 数据库的设计原则： 尽量少用约束，因为约束越多，我们的数据的检查就会大大的减少性能，从而得到性能大大的提升
+>
+>   * 把数据库的检查约束直接在前端或者后端中进行检测，因为我们的代码的运行效率是很快的
+>
+>   * 数据库的设计，尽量减少对数据库压力的减少，这个就是我们的数据库设计的原则一
+>
+>   * ```sql
+>     create database if not exists my_demo;  -- 实现的是创建数据库
+>     use my_demo;  -- 使用数据库，保证接下来的操作全部是在该数据库中进行操作的
+>     
+>     drop table if exists prtInfo;  -- 如果表存在直接及逆行删除即可
+>     create table if not exists prtInfo(  -- 创建数据库表的操作
+>     	pid int primary key auto_increment,  -- 添加主键约束，并且是自增的
+>     	pname varchar(20) not null,
+>     	ptype varchar(30),
+>     	page int not null,
+>     	pbirthday date not null
+>     );
+>     -- alter table prtInfo add constraint pk_pid primary key(pid);  -- 添加主键约束
+>     
+>     
+>     drop table if exists eInfo;
+>     create table if not exists eInfo(  -- 创建第二个表
+>     	eid int,
+>     	pid int not null,
+>     	edate date not null,
+>     	vid int not null
+>     );
+>     -- 开始实现添加主键
+>     alter table eInfo add constraint pk_eid primary key(eid);
+>     -- 开始实现添加两个表的外键关联
+>     alter table eInfo add constraint fk_pid foreign key(pid) references prtInfo(pid) on DELETE CASCADE;
+>     
+>     
+>     drop table if exists vaccine;
+>     create table vaccine(  -- 实现创建第三张表
+>     	vid int primary key,
+>     	vname varchar(30) not null,
+>     	v_date date
+>     );
+>     -- 再实现添加一个外键约束
+>     alter table eInfo add constraint fk_vid foreign key(vid) references vaccine(vid) on DELETE CASCADE;
+>     ```
+>
+>   * 上面的数据库设计就是实现了我们的
+>
+>     * 第一个表中含有一个主键
+>     * 第二个表中含有一个主键两个关联父表的外键
+>     * 第三个表创建了一个主键，用于和第二个表进行关联
+>     * mysql 数据库中，**我们一个表中的主键只能有一个，但是我们的外键可以有多个**，我个人感觉这个也是数据库设计时候
+>       * 需要注意的一个点吧
+>
+> * 软件开发流程设计中，我们的设计步骤具有包含三种:
+>
+>   * 客户提出需求，项目立项
+>   * 需求调研，生成需求规则说明书 SRS
+>   * 软件设计
+>     * **概要设计**，确定一个软件含有那些主要的功能模块
+>     * **数据库设计**， 数据库设计主要是实现我们对数据的一些处理的一种设计
+>     * **详细设计**
+>   * 前后端进行编码实现详细设计
+>   * 然后进行测试，实现我们的找到软件具有的一些明显问题，以及解决问题
+>   * 试运行和上线以及维护
+>
+> * 我们开发人员主要注重的就是数据库设计
+>
+>   * 用户管理功能的设计
+>   * 考虑每一个数据库中的表的设计，每个表之间的联系
+>   * ![img](./images/img.png)
+
+
 
 #### 数据库的增删改查操作
 
+> * 注意我们的对数据库的操作的话，如果进行的**增加、删除、修改**的操作，我们是需要进行**提交事务的 `commit`**
+> * **插入数据**
+>   * **`insert into 表名 [(字段名)] values (数据);`**
+>     * 注意事项： 字段名个数和数据的个数一定要保证一致
+>     * 对于一些自增的字段不用手动的添加字段值
+>     * 如果值为默认值，我们是可以直接添加 default 字段的，这个时候就是使用的是我们的默认值替换
+>   * **`insert into 备份表(字段) select (字段名) from 原本的表;`**
+>     * 这样就可以实现我们的查询式的插入数据
+>     * `commit` 提交事务
+>   * **`insert into 表名 (字段名) values (数据集1), (数据集2)...`**
+> * **更新数据**
+>   * **`update 表名 set 需要修改的表字段1=更新后的值1,... 条件语句;`**
+>     * 条件语句的添加是为了精确的实现更新数据库中的数据，条件语句就是进行的过滤操作
+>     * `where 表中的具有标识的字段=原本表中的数据;`
+>     * 最后进行 `commit` 提交事务
+> * **删除数据**
+>   * **`delete from 表名 条件判断`**
+>     * 我们进行表中的数据的时候，我们任然是需要进行添加判断条件来进行删除的过滤操作
+>     * 最后任然还是需要进行提交事务的 `commit`  提交事务
+> * **查询数据**
+>   * **精确查询**
+>     * **`select * from 表名`**
+>       * `*` 是我们的通配符，这个时候，我们就可以实现的是将一个表中的数据全部查询出来了
+>     * **`select * from 表名 where 表中具备的字段名=对应的值;`**
+>       * 这个就是我们的**等值查询**，查询出满足条件的值
+>     * **`select * from 表名 where 表中具备的字段!=对应的值;`**
+>       * 这个就是我们的**不等值查询**
+>     * **`select 字段名 from 表名 条件判断`**
+>       * 逻辑与查询
+>         * 这里的范围条件可以是 `> | < | >= | <=` ，含有多个判断条件进行连接的时候，可以使用 `and` 进行拼接
+>         * 同时我们还是可以使用 `between...and`，区间的话是闭区间 `[]`
+>       * 数据为空查询
+>         * 同时我们的数据为空的判断条件可以是 `="" | is null | is not null`
+>       * 逻辑或查询
+>         * 同时还有我们的 `or` 关键字来实现代表我们的**并集操作**
+>         * `in (值1, 值2...)` 通过这样的语句可以一样的和 `or` 一致的操作
+>       * 这个就是实现的是查询出我们的满足条件的对应字段信息
+>   * **模糊查询**
+>     * **`select * from 表名 where 表中具有的字段名 like "%具有的值%";`**
+>       * `%`  表示的是 零个或者多个字符
+>   * **别名查询**
+>     * **`select title as 书名, publish as 出版社 from 表`**
+>       * `as` 语句就是实现的是起别名的操作 
+>       * `as` 还可以省略，但是为了标准，尽量还是写吧
+>   * **分页查询**
+>     * **`select * from 表名 limit 0, 5`**
+>       * 这个语句就是表示的是获取前五个查询到的数据，**第一个数字是起始下标，第二个数字是查询的步长**
+>       * 这个就是使用的是 **`limit` 关键字**
