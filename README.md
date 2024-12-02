@@ -482,20 +482,74 @@
 ##### 数据库的进阶操作
 
 > * **聚合函数查询**
+>
 >   * **`select 聚合函数名(字段名) from 表名;`**
 >     * **count** 实现的是返回结果集中所有值的数目
 >     * **sum** 返回查询结果集中所有值的总和
 >     * **avg** 返回结果集中所有值的平均值
 >     * **max** 实现的返回结果集中所有值的最大值
 >     * **min** 实现的是返回结果集中所有值的最小值
+>
 > * **分组查询**
+>
 >   * **`select 字段名 from 表名 group by 指定根据什么字段名分组`**
 >     * 实现我们的分组查询就是使用的是 `group by` 来实现指定我们根据什么来实现分组查询
 >     * 使用分组查询的时候，除了分组查询字段和聚合函数外，其他的字段查询尽量不要混入查询，否则报错
+>   * 分组之后我们进行过滤的话就需要使用我们的 **having** 关键字来实现过滤操作，其可以使用句和函数进行过滤
+>   * 多个过滤语句的书写顺序
+>     * **`select 查询内容 from 表名 where 条件判断 group by 字段名 having 分组后的再次过滤 order by 排序依据字段 limit 分页操作`**
+>
+> * **日期函数**
+>
+>   * **`year(日期字段)`** 就可以获取得到我们的日期的年份了
+>   * **`now()`** 实现的是就是获取的当前的时间，查询的表是 **`dual`** 表来实现指代我们的时间表
+>     * **`select year(now()) - year(时间字段) from 表名`**
+>   * **`day(now())`** 实现获取的是当前的日期
+>   * **`month(now())`** 实现获取的是当前的月份
+>   * **[其他的关于时间的sql语句操作](https://blog.csdn.net/WL456258/article/details/134884445)**
+>
+> * **子查询**
+>
+>   * 子查询就是把其他的查询语句当作一个查询语句的条件来进行使用，这个就是子查询
+>   * 同时这里需要满足的是**父查询和子查询的条件过滤字段和子查询字段名一致**，这是基本的要求
+>   * **`= | in`** 的使用，但是为了保险，子查询可以统一使用 **`in`** 因为这个不仅仅可以判断一行，还可以是多行
+>     * **`seletc sname from student where o in (select o from score where o > 10) limit 0, 5;`**
+>   * **子查询和 exists 之间的联合查询**
+>     * **`select sname from student as stu where exists (select * from score as sco where stu.o=sco.o;)`**
+>     * **这个和后面的连表查询的思维类似，注意起别名**
+>   * `any | all` 语句查询
+>     * **any** 表示和查询的结果的任意值比较
+>     * **all** 表示和最值进行比较
+>
+> * **关联查询（这个时候可能导致笛卡尔积）【所以说我们就需要一定的条件进行过滤，这个就是相同字段间的关系问题】**
+>
+>   * 关联查询分为我们的 **内关联查询** 和 **外关联查询**
+>
+>   * 我们的标准的写法是使用我们的 **join** 连接两张表
+>
+>   * **`select sname, cno from student s, score c where s.sno in (select sno from score where degree is not null) and s.sno = c.sno;`**
+>
+>   * **[关联查询语句的博客](https://blog.csdn.net/wjl990316fddwjl/article/details/135732939)**
+>
+>   * ```sql
+>     SELECT employee_id, department_name
+>     FROM employees e
+>     INNER JOIN departments d ON e.department_id = d.department_id;
+>     ```
+>
+>   * ```sql
+>     SELECT employee_id, department_name
+>     FROM employees e
+>     LEFT JOIN departments d ON e.department_id = d.department_id;
+>     ```
+>
+>   * ```sql
+>     SELECT department_id, employee_id, employee_name
+>     FROM departments d
+>     RIGHT JOIN employees e ON d.department_id = e.department_id;
+>     ```
 
-
-
-
+#### 还可以自己拓展使用 `触发器 游标  事务 视图`
 
 ```sql
 create database if not exists library;  -- 创建数据库
@@ -613,28 +667,36 @@ select bookid, bookName,borrowsum from book;
 
 select bookid as "书号",bookName as 书名, borrowsum as 接触数量 from book;
 
+-- 子查询一
 select * from reader where retypeid = (select retypeid from readertype where readerName = "学生");
 
+-- 范围查询三
 select bookBarcode from bookBorrow where borrowtime
 >= "2011-03-01" and returnTime <= "2011-10-1";
 
+-- 子查询二
 select * from reader where
 retypeid in ((select retypeid from readerType where readerName = "学生"),
 (select retypeid from readerType where readerName = "教师"));
 
+-- 模糊查询
 select * from book where bookName like "%程序%";
 
+-- 排序查询 + 分页查询
 select * from book order by borrowSum desc limit 3;
 
+-- 多个排序查询
 select * from book order by borrowSum desc, bookprice desc;
 
+-- 分页查询
 select bookName, bookPrice from book limit 1,5;
 
+-- 连表查询
 select * from bookborrow as a1 LEFT JOIN reader as a2 on a1.readerId = a2.readerid;
+
 
 select count(bookBarcode) as
 sumBook from bookborrow as a1 LEFT JOIN reader as a2 on a1.readerId = a2.readerid GROUP BY retypeid;
-
 
 select avg(bookprice) as 平均价格 from book group by bookpublihser;
 
