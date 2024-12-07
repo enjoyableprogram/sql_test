@@ -12,9 +12,9 @@
 >   * `UDP（User Datagram Protocol）` 用户数据包协议没有三次握手，**不稳定不可靠，性能高**（视频通话）
 > * 代码
 
-![](./images/img_01.png)
+![](../images/img_01.png)
 
-![](./images/img_02.png)
+![](../images/img_02.png)
 
 * ACK 就是应答的意思Acknowleage
 * TCP 的连接是全双工模式，所以说就要求我们的实现基本的两边的同意才可以执行某种行为
@@ -415,7 +415,7 @@
 >
 >   * 用户管理功能的设计
 >   * 考虑每一个数据库中的表的设计，每个表之间的联系
->   * ![img](./images/img.png)
+>   * ![img](../images/img.png)
 
 
 
